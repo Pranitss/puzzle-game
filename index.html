@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            position: relative;
+            perspective: 600px;
+        }
+
+        .tile {
+            width: 100px;
+            height: 100px;
+            background-color: #2196F3;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.5s ease-in-out;
+            transform-style: preserve-3d;
+        }
+
+        .tile.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #toggle-button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+    <title>Advanced Sliding Puzzle Game</title>
+</head>
+<body>
+    <div id="puzzle-container"></div>
+    <button id="toggle-button">Toggle Tiles</button>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const gridSize = 3;
+            const emptyTile = gridSize * gridSize;
+            const puzzleContainer = document.getElementById("puzzle-container");
+            const toggleButton = document.getElementById("toggle-button");
+
+            function initializePuzzle() {
+                for (let i = 1; i <= emptyTile - 1; i++) {
+                    const tile = document.createElement("div");
+                    tile.className = "tile";
+                    tile.textContent = i;
+                    tile.addEventListener("click", () => moveTile(i));
+                    puzzleContainer.appendChild(tile);
+                }
+            }
+
+            function shufflePuzzle() {
+                const tiles = Array.from(document.querySelectorAll(".tile"));
+                tiles.sort(() => Math.random() - 0.5);
+                tiles.forEach((tile, index) => {
+                    puzzleContainer.appendChild(tile);
+                    tile.textContent = index + 1;
+                });
+            }
+
+            function isPuzzleSolved() {
+                const tiles = Array.from(document.querySelectorAll(".tile"));
+                return tiles.every((tile, index) => tile.textContent == index + 1);
+            }
+
+            function moveTile(tileNumber) {
+                const emptyTileElement = document.querySelector(`.tile:empty`);
+                const tileElement = document.querySelector(`.tile:nth-child(${tileNumber})`);
+
+                if (isAdjacent(emptyTileElement, tileElement)) {
+                    const emptyTileText = emptyTileElement.textContent;
+                    emptyTileElement.textContent = tileElement.textContent;
+                    tileElement.textContent = emptyTileText;
+
+                    if (isPuzzleSolved()) {
+                        alert("Congratulations! You solved the puzzle!");
+                        initializePuzzle();
+                        shufflePuzzle();
+                    }
+                }
+            }
+
+            function isAdjacent(tile1, tile2) {
+                const index1 = Array.from(puzzleContainer.children).indexOf(tile1);
+                const index2 = Array.from(puzzleContainer.children).indexOf(tile2);
+                const row1 = Math.floor(index1 / gridSize);
+                const col1 = index1 % gridSize;
+                const row2 = Math.floor(index2 / gridSize);
+                const col2 = index2 % gridSize;
+
+                return (
+                    (Math.abs(row1 - row2) == 1 && col1 == col2) ||
+                    (Math.abs(col1 - col2) == 1 && row1 == row2)
+                );
+            }
+
+            function toggleTiles() {
+                const tiles = document.querySelectorAll('.tile');
+                tiles.forEach(tile => tile.classList.toggle('hidden'));
+            }
+
+            initializePuzzle();
+            shufflePuzzle();
+
+            toggleButton.addEventListener('click', toggleTiles);
+        });
+    </script>
+</body>
+</html>
